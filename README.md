@@ -22,13 +22,13 @@ gh repo create tycho991/<name> --private --template tycho991/openspec-project-te
 cd <name>
 mise trust
 mise install
-mise run openspec-sync
+mise run openspec-profile
 openspec init --tools claude
 git status
 ```
 
-`openspec-sync` vor `init` setzt Profil und Delivery, bevor die ersten Dateien
-entstehen. OpenSpec 1.14.3 legt an:
+`openspec-profile` setzt Profil und Delivery, bevor die ersten Dateien
+entstehen. `openspec-sync` ruft es danach jedes Mal selbst auf. OpenSpec 1.14.3 legt an:
 
 - `openspec/` mit Specs, Changes und `config.yaml`
 - `.claude/commands/opsx/<id>.md`, in Claude Code als `/opsx:<id>`
