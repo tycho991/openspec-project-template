@@ -1,0 +1,18 @@
+[tools]
+node = "24.22.0"
+"npm:@fission-ai/openspec" = "1.14.3"
+
+[env]
+OPENSPEC_TELEMETRY = "0"
+DO_NOT_TRACK = "1"
+
+# Profil und Delivery liest OpenSpec aus der globalen Config des Rechners
+# (~/.config/openspec/config.json). Der Task setzt sie vor jedem Update, damit
+# jeder Rechner und die CI dieselben Skills erzeugen.
+[tasks.openspec-sync]
+description = "Skills und Commands an die gepinnte OpenSpec-Version und das Projektprofil anpassen"
+run = [
+  "openspec config set profile core",
+  "openspec config set delivery both",
+  "openspec update --force",
+]
