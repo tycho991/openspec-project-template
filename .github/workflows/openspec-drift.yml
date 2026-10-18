@@ -26,19 +26,13 @@ jobs:
           git add -A
           git diff --cached --stat --exit-code
 
-      - name: Skill-Struktur pruefen
+      - name: Skill-Namen pruefen
         run: |
           rc=0
-          [ -d .opencode/skills ] || exit 0
-          # OpenCode 2 macht aus losen *.md und tieferen SKILL.md weitere Skills
-          for f in $(find .opencode/skills -maxdepth 1 -type f -name '*.md') \
-                   $(find .opencode/skills -mindepth 3 -name SKILL.md); do
-            echo "::error file=$f::wird von OpenCode als zusaetzlicher Skill geladen"; rc=1
-          done
-          for f in .opencode/skills/*/SKILL.md; do
+          for f in .claude/skills/*/SKILL.md; do
             [ -e "$f" ] || continue
-            id=$(basename "$(dirname "$f")")
-            echo "$id" | grep -Eq '^[a-z0-9]+(-[a-z0-9]+)*$' || { echo "::error file=$f::ungueltige Skill-ID $id"; rc=1; }
+            name=$(basename "$(dirname "$f")")
+            echo "$name" | grep -Eq '^[a-z0-9]+(-[a-z0-9]+)*$' || { echo "::error file=$f::ungueltiger Skill-Name $name"; rc=1; }
             grep -Eq '^description:[[:space:]]*[^[:space:]]' "$f" || { echo "::error file=$f::description fehlt"; rc=1; }
           done
           exit $rc
