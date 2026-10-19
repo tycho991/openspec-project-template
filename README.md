@@ -1,98 +1,99 @@
 # openspec-project-template
 
-Vorlage für Projekte mit [OpenSpec](https://github.com/Fission-AI/OpenSpec) und
-Claude Code in VS Code (Erweiterung `anthropic.claude-code`). Die
-Maschinen-Seite (mise, Node, Claude-Code-Einstellungen, globale Skills, der
-Befehl `pj`) kommt aus `ansible-terminal` (`playbooks/dev_tools.yml`). Planung und Hintergründe:
+Template for projects using [OpenSpec](https://github.com/Fission-AI/OpenSpec)
+and Claude Code in VS Code (extension `anthropic.claude-code`). The machine side
+(mise, Node, Claude Code settings, global skills, the `pj` command) comes from
+`ansible-terminal` (`playbooks/dev_tools.yml`). Background:
 `Planung OpenSpec + Claude Code Multi-Maschinen-Setup v4.md`.
 
-## Inhalt
+## Contents
 
-| Datei | Zweck |
+| File | Purpose |
 |---|---|
-| `.mise.toml` | Node und OpenSpec exakt gepinnt, Telemetrie aus, Task `openspec-sync` |
-| `.gitignore` | `.claude/settings.local.json` (persönliche Freigaben) bleibt lokal |
-| `renovate.json` | Updates per PR, 7 Tage Mindestalter, Node-Majors nur nach Freigabe |
-| `.github/workflows/openspec-drift.yml` | prüft, dass die committeten Skills und Commands genau zur gepinnten Version passen |
+| `.mise.toml` | Node and OpenSpec pinned exactly, telemetry off, tasks `openspec-profile` and `openspec-sync` |
+| `.gitignore` | keeps `.claude/settings.local.json` (personal approvals) local |
+| `renovate.json` | updates by PR, 7-day minimum age, Node majors only after approval |
+| `.github/workflows/openspec-drift.yml` | checks that the committed skills and commands match the pinned version exactly |
 
-## Neues Projekt
+## New project
 
 ```bash
-pj neu <name>
+pj new <name>
 ```
 
-`pj` legt `tycho991/<name>` privat aus dieser Vorlage an, klont es nach
-`~/Downloads/Code/<name>`, richtet mise und OpenSpec ein (Node und OpenSpec
-gepinnt, `openspec init --tools claude`), committet, pusht und öffnet das
-Projekt in VS Code. Dort im Claude-Code-Panel `/opsx:propose "…"`.
+`pj` creates `tycho991/<name>` as a private repo from this template, clones it to
+`~/Downloads/Code/<name>`, sets up mise and OpenSpec (Node and OpenSpec pinned,
+`openspec init --tools claude`), commits, pushes and opens the project in
+VS Code. There, in the Claude Code panel: `/opsx:propose "…"`.
 
-Von Hand, ohne `pj`:
+By hand, without `pj`:
 
 ```bash
 gh repo create tycho991/<name> --private --template tycho991/openspec-project-template --clone
 cd <name> && mise trust && mise install && mise run openspec-profile && openspec init --tools claude
-git add openspec .claude && git commit -m "OpenSpec einrichten" && git push
+git add openspec .claude && git commit -m "Set up OpenSpec" && git push
 ```
 
-`openspec-profile` setzt Profil und Delivery, bevor die ersten Dateien
-entstehen. `openspec-sync` ruft es danach jedes Mal selbst auf. OpenSpec 1.14.3
-legt an:
+`openspec-profile` sets the profile and delivery before the first files are
+generated; `openspec-sync` calls it itself afterwards every time. OpenSpec 1.14.3
+creates:
 
-- `openspec/` mit Specs, Changes und `config.yaml`
-- `.claude/commands/opsx/<id>.md`, in Claude Code als `/opsx:<id>`
-- `.claude/skills/openspec-*/` für die Skills
+- `openspec/` with specs, changes and `config.yaml`
+- `.claude/commands/opsx/<id>.md`, available in Claude Code as `/opsx:<id>`
+- `.claude/skills/openspec-*/` for the skills
 
-`mise trust` ist pro Projekt einmal nötig. Ein pauschales Vertrauen für ganze
-Verzeichnisse (`trusted_config_paths`) ist bewusst nicht eingerichtet.
+`mise trust` is needed once per project. Blanket trust for whole directories
+(`trusted_config_paths`) is deliberately not set up.
 
-## Bestehendes Projekt öffnen
+## Open an existing project
 
 ```bash
-pj offen            # Auswahl aus lokalen und GitHub-Projekten
-pj offen frame      # oder mit Suchbegriff
+pj open            # pick from local and GitHub projects
+pj open frame      # or with a search term
 ```
 
-Klont bei Bedarf, aktualisiert (`git pull --ff-only`), richtet mise ein und
-öffnet VS Code. Nutzt das Projekt noch kein OpenSpec, im Projektordner
-`pj openspec` ausführen: ergänzt die Dateien aus dieser Vorlage und committet
-auf dem Branch `openspec-einrichten` (ohne Push).
+Clones if needed, updates (`git pull --ff-only`), sets up mise and opens
+VS Code. If the project does not use OpenSpec yet, run `pj openspec` in the
+project folder: it adds the files from this template and commits them on the
+branch `openspec-setup` (not pushed).
 
-## Bestehendes Projekt von Hand ergänzen
+## Adding the template files to an existing project by hand
 
-`.mise.toml`, `.gitignore`, `renovate.json` und den Workflow (nach
-`.github/workflows/`) ins Projekt kopieren, dann wie oben ab `mise trust`. Hat
-das Projekt schon einen `openspec/`-Ordner, statt `openspec init` nur
-`mise run openspec-sync`.
+Copy `.mise.toml`, `.gitignore`, `renovate.json` and the workflow (to
+`.github/workflows/`) into the project, then continue as above from
+`mise trust`. If the project already has an `openspec/` folder, run just
+`mise run openspec-sync` instead of `openspec init`.
 
-## OpenSpec aktualisieren
+## Updating OpenSpec
 
-Renovate öffnet einen PR, der `.mise.toml` erhöht. Im Branch dieses PRs:
+Renovate opens a PR that raises the version in `.mise.toml`. On that PR's
+branch:
 
 ```bash
 mise install
 mise run openspec-sync
-git add -A && git commit -m "OpenSpec-Skills aktualisieren"
+git add -A && git commit -m "Update OpenSpec skills"
 ```
 
-Erst dann wird die Drift-Prüfung grün. Für mehrere Projekte auf einmal:
+Only then does the drift check turn green. For several projects at once, use
 `scripts/bump-openspec.sh` in `ansible-terminal`.
 
-## Eigene Skills im Projekt
+## Your own skills in a project
 
-- Ordner `.claude/skills/<name>/` mit `SKILL.md`. Der Ordnername ist der
-  Skill-Name: `^[a-z0-9]+(-[a-z0-9]+)*$`, nicht mit `openspec-` beginnend.
-- `description` im Frontmatter ist Pflicht, sonst wählt Claude den Skill nicht
-  von selbst aus. Die Drift-Prüfung meldet beides.
-- Persönliche Skills (`~/.claude/skills/`) haben Vorrang vor Projekt-Skills
-  gleichen Namens.
+- Folder `.claude/skills/<name>/` with a `SKILL.md`. The folder name is the
+  skill name: `^[a-z0-9]+(-[a-z0-9]+)*$`, not starting with `openspec-`.
+- `description` in the frontmatter is required, otherwise Claude does not pick
+  the skill on its own. The drift check reports both.
+- Personal skills (`~/.claude/skills/`) take precedence over project skills of
+  the same name.
 
-## Arbeitsablauf pro Änderung
+## Workflow per change
 
-1. `/opsx:propose` im Claude-Code-Panel in VS Code (Proposal, Tasks und Spec-Deltas unter
-   `openspec/changes/<name>/`)
-2. `openspec validate <name>` und `openspec show <name>`
-3. `/opsx:apply` zum Umsetzen
-4. `/opsx:archive` bzw. `openspec archive <name> --yes`
+1. `/opsx:propose` in the Claude Code panel (proposal, tasks and spec deltas
+   under `openspec/changes/<name>/`)
+2. `openspec validate <name>` and `openspec show <name>`
+3. `/opsx:apply` to implement
+4. `/opsx:archive`, or `openspec archive <name> --yes`
 
-Die genauen Commands stehen in `.claude/commands/opsx/` und richten sich nach
-der gepinnten OpenSpec-Version.
+The exact commands are in `.claude/commands/opsx/` and depend on the pinned
+OpenSpec version.
