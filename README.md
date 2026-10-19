@@ -3,8 +3,8 @@
 Template for projects using [OpenSpec](https://github.com/Fission-AI/OpenSpec)
 and Claude Code in VS Code (extension `anthropic.claude-code`). The machine side
 (mise, Node, Claude Code settings, global skills, the `pj` command) comes from
-`ansible-terminal` (`playbooks/dev_tools.yml`). Background:
-`Planung OpenSpec + Claude Code Multi-Maschinen-Setup v4.md`.
+`ansible-terminal` (`playbooks/dev_tools.yml`). Background and decisions:
+[docs/dev-tools.md in ansible-terminal](https://github.com/tycho991/ansible-terminal/blob/main/docs/dev-tools.md).
 
 ## Contents
 
