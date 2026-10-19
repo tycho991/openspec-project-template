@@ -1,2 +1,2 @@
-# Persoenliche Freigaben von Claude Code, gehoeren nicht ins Repo
+# Personal Claude Code approvals stay local and do not belong in the repo
 .claude/settings.local.json
