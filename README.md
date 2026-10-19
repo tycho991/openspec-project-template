@@ -1,9 +1,9 @@
 # openspec-project-template
 
 Vorlage für Projekte mit [OpenSpec](https://github.com/Fission-AI/OpenSpec) und
-Claude Code (Desktop-App, Code-Tab). Die Maschinen-Seite (mise, Node,
-Claude-Code-Einstellungen, globale Skills) kommt aus `ansible-terminal`
-(`playbooks/dev_tools.yml`). Planung und Hintergründe:
+Claude Code in VS Code (Erweiterung `anthropic.claude-code`). Die
+Maschinen-Seite (mise, Node, Claude-Code-Einstellungen, globale Skills, der
+Befehl `pj`) kommt aus `ansible-terminal` (`playbooks/dev_tools.yml`). Planung und Hintergründe:
 `Planung OpenSpec + Claude Code Multi-Maschinen-Setup v4.md`.
 
 ## Inhalt
@@ -18,35 +18,46 @@ Claude-Code-Einstellungen, globale Skills) kommt aus `ansible-terminal`
 ## Neues Projekt
 
 ```bash
+pj neu <name>
+```
+
+`pj` legt `tycho991/<name>` privat aus dieser Vorlage an, klont es nach
+`~/Downloads/Code/<name>`, richtet mise und OpenSpec ein (Node und OpenSpec
+gepinnt, `openspec init --tools claude`), committet, pusht und öffnet das
+Projekt in VS Code. Dort im Claude-Code-Panel `/opsx:propose "…"`.
+
+Von Hand, ohne `pj`:
+
+```bash
 gh repo create tycho991/<name> --private --template tycho991/openspec-project-template --clone
-cd <name>
-mise trust
-mise install
-mise run openspec-profile
-openspec init --tools claude
-git status
+cd <name> && mise trust && mise install && mise run openspec-profile && openspec init --tools claude
+git add openspec .claude && git commit -m "OpenSpec einrichten" && git push
 ```
 
 `openspec-profile` setzt Profil und Delivery, bevor die ersten Dateien
-entstehen. `openspec-sync` ruft es danach jedes Mal selbst auf. OpenSpec 1.14.3 legt an:
+entstehen. `openspec-sync` ruft es danach jedes Mal selbst auf. OpenSpec 1.14.3
+legt an:
 
 - `openspec/` mit Specs, Changes und `config.yaml`
 - `.claude/commands/opsx/<id>.md`, in Claude Code als `/opsx:<id>`
 - `.claude/skills/openspec-*/` für die Skills
 
-Danach gezielt committen:
-
-```bash
-git add openspec .claude
-git commit -m "OpenSpec einrichten"
-```
-
 `mise trust` ist pro Projekt einmal nötig. Ein pauschales Vertrauen für ganze
 Verzeichnisse (`trusted_config_paths`) ist bewusst nicht eingerichtet.
 
-Dann den Projektordner im Code-Tab der Desktop-App öffnen.
+## Bestehendes Projekt öffnen
 
-## Bestehendes Projekt
+```bash
+pj offen            # Auswahl aus lokalen und GitHub-Projekten
+pj offen frame      # oder mit Suchbegriff
+```
+
+Klont bei Bedarf, aktualisiert (`git pull --ff-only`), richtet mise ein und
+öffnet VS Code. Nutzt das Projekt noch kein OpenSpec, im Projektordner
+`pj openspec` ausführen: ergänzt die Dateien aus dieser Vorlage und committet
+auf dem Branch `openspec-einrichten` (ohne Push).
+
+## Bestehendes Projekt von Hand ergänzen
 
 `.mise.toml`, `.gitignore`, `renovate.json` und den Workflow (nach
 `.github/workflows/`) ins Projekt kopieren, dann wie oben ab `mise trust`. Hat
@@ -77,7 +88,7 @@ Erst dann wird die Drift-Prüfung grün. Für mehrere Projekte auf einmal:
 
 ## Arbeitsablauf pro Änderung
 
-1. `/opsx:propose` im Code-Tab (Proposal, Tasks und Spec-Deltas unter
+1. `/opsx:propose` im Claude-Code-Panel in VS Code (Proposal, Tasks und Spec-Deltas unter
    `openspec/changes/<name>/`)
 2. `openspec validate <name>` und `openspec show <name>`
 3. `/opsx:apply` zum Umsetzen
