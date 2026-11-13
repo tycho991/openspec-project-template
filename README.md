@@ -28,8 +28,9 @@ pj new <name>
 `~/Downloads/Code/<name>`, sets up mise and OpenSpec (Node and OpenSpec pinned,
 `openspec init --tools claude,opencode`), commits, pushes and opens the
 project in VS Code. There, in the Claude Code panel: `/opsx:propose "…"`.
-`pj new <name> --opencode` starts OpenCode in the terminal instead; there the
-command is `/opsx-propose "…"`.
+`pj new <name> --opencode` starts OpenCode in the terminal instead (there the
+command is `/opsx-propose "…"`), `pj new <name> --claude` Claude Code in the
+terminal.
 
 By hand, without `pj`:
 
@@ -60,10 +61,11 @@ creates:
 pj open                      # pick from local and GitHub projects
 pj open frame                # or with a search term
 pj open frame --opencode     # OpenCode in this terminal instead of VS Code
+pj open frame --claude       # Claude Code in this terminal
 ```
 
 Clones if needed, updates (`git pull --ff-only`), sets up mise and opens
-VS Code (or OpenCode). If the project does not use OpenSpec yet, run
+VS Code (default, `--code`), OpenCode or Claude Code. If the project does not use OpenSpec yet, run
 `pj openspec` in the project folder: it adds the files from this template and
 commits them on the branch `openspec-setup` (not pushed). If it uses OpenSpec
 but has no `.opencode/` yet, `pj openspec` adds the OpenCode files instead and
