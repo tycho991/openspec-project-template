@@ -1,8 +1,11 @@
 # openspec-project-template
 
 Template for projects using [OpenSpec](https://github.com/Fission-AI/OpenSpec)
-and Claude Code in VS Code (extension `anthropic.claude-code`). The machine side
-(mise, Node, Claude Code settings, global skills, the `pj` command) comes from
+with Claude Code in VS Code (extension `anthropic.claude-code`) or, as an
+option, [OpenCode](https://opencode.ai) in the terminal. OpenCode runs on the
+Claude subscription through its provider "Claude Agent", which starts the local
+Claude Code; Anthropic has not approved that route publicly. The machine side
+(mise, Node, Claude Code and OpenCode settings, global skills, the `pj` command) comes from
 `ansible-terminal` (`playbooks/dev_tools.yml`). Background and decisions:
 [docs/dev-tools.md in ansible-terminal](https://github.com/tycho991/ansible-terminal/blob/main/docs/dev-tools.md).
 
@@ -23,15 +26,17 @@ pj new <name>
 
 `pj` creates `tycho991/<name>` as a private repo from this template, clones it to
 `~/Downloads/Code/<name>`, sets up mise and OpenSpec (Node and OpenSpec pinned,
-`openspec init --tools claude`), commits, pushes and opens the project in
-VS Code. There, in the Claude Code panel: `/opsx:propose "…"`.
+`openspec init --tools claude,opencode`), commits, pushes and opens the
+project in VS Code. There, in the Claude Code panel: `/opsx:propose "…"`.
+`pj new <name> --opencode` starts OpenCode in the terminal instead; there the
+command is `/opsx-propose "…"`.
 
 By hand, without `pj`:
 
 ```bash
 gh repo create tycho991/<name> --private --template tycho991/openspec-project-template --clone
-cd <name> && mise trust && mise install && mise run openspec-profile && openspec init --tools claude
-git add openspec .claude && git commit -m "Set up OpenSpec" && git push
+cd <name> && mise trust && mise install && mise run openspec-profile && openspec init --tools claude,opencode
+git add openspec .claude .opencode && git commit -m "Set up OpenSpec" && git push
 ```
 
 `openspec-profile` sets the profile and delivery before the first files are
@@ -41,6 +46,10 @@ creates:
 - `openspec/` with specs, changes and `config.yaml`
 - `.claude/commands/opsx/<id>.md`, available in Claude Code as `/opsx:<id>`
 - `.claude/skills/openspec-*/` for the skills
+- `.opencode/commands/opsx-<id>.md`, available in OpenCode as `/opsx-<id>`
+- `.opencode/skills/openspec-*/`, the same skills for OpenCode
+
+`openspec-sync` keeps both sets in line with the pinned version.
 
 `mise trust` is needed once per project. Blanket trust for whole directories
 (`trusted_config_paths`) is deliberately not set up.
@@ -48,21 +57,26 @@ creates:
 ## Open an existing project
 
 ```bash
-pj open            # pick from local and GitHub projects
-pj open frame      # or with a search term
+pj open                      # pick from local and GitHub projects
+pj open frame                # or with a search term
+pj open frame --opencode     # OpenCode in this terminal instead of VS Code
 ```
 
 Clones if needed, updates (`git pull --ff-only`), sets up mise and opens
-VS Code. If the project does not use OpenSpec yet, run `pj openspec` in the
-project folder: it adds the files from this template and commits them on the
-branch `openspec-setup` (not pushed).
+VS Code (or OpenCode). If the project does not use OpenSpec yet, run
+`pj openspec` in the project folder: it adds the files from this template and
+commits them on the branch `openspec-setup` (not pushed). If it uses OpenSpec
+but has no `.opencode/` yet, `pj openspec` adds the OpenCode files instead and
+commits them on the branch `openspec-opencode` (not pushed).
 
 ## Adding the template files to an existing project by hand
 
 Copy `.mise.toml`, `.gitignore`, `renovate.json` and the workflow (to
 `.github/workflows/`) into the project, then continue as above from
-`mise trust`. If the project already has an `openspec/` folder, run just
-`mise run openspec-sync` instead of `openspec init`.
+`mise trust`. If the project already has an `openspec/` folder for both tools,
+run just `mise run openspec-sync` instead of `openspec init`; if it only has
+the Claude Code files, `openspec init --tools claude,opencode` adds
+`.opencode/` and leaves the rest alone.
 
 ## Updating OpenSpec
 
@@ -86,6 +100,9 @@ Only then does the drift check turn green. For several projects at once, use
   the skill on its own. The drift check reports both.
 - Personal skills (`~/.claude/skills/`) take precedence over project skills of
   the same name.
+- OpenCode loads `.claude/skills/` and `~/.claude/skills/` as well, so a skill
+  there serves both tools. OpenCode-only skills go to `.opencode/skills/<name>/`
+  under the same rules; the drift check covers both folders.
 
 ## Workflow per change
 
@@ -95,5 +112,6 @@ Only then does the drift check turn green. For several projects at once, use
 3. `/opsx:apply` to implement
 4. `/opsx:archive`, or `openspec archive <name> --yes`
 
-The exact commands are in `.claude/commands/opsx/` and depend on the pinned
-OpenSpec version.
+In OpenCode the commands are `/opsx-propose`, `/opsx-apply` and
+`/opsx-archive`. The exact commands are in `.claude/commands/opsx/` and
+`.opencode/commands/` and depend on the pinned OpenSpec version.
