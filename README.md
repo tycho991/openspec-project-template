@@ -14,7 +14,7 @@ Claude Code; Anthropic has not approved that route publicly. The machine side
 | File | Purpose |
 |---|---|
 | `.mise.toml` | Node and OpenSpec pinned exactly, telemetry off, tasks `openspec-profile` and `openspec-sync` |
-| `.gitignore` | keeps `.claude/settings.local.json` (personal approvals) local |
+| `.gitignore` | keeps `.claude/settings.local.json` (personal approvals) and openrig's `.openrig/` local |
 | `renovate.json` | updates by PR, 7-day minimum age, Node majors only after approval |
 | `.github/workflows/openspec-drift.yml` | checks that the committed skills and commands match the pinned version exactly |
 
@@ -88,10 +88,17 @@ branch:
 ```bash
 mise install
 mise run openspec-sync
-git add -A && git commit -m "Update OpenSpec skills"
+git add -A -- .mise.toml openspec .claude/commands '.claude/skills/openspec-*' .opencode
+git status --short    # anything left over is not from OpenSpec
+git commit -m "Update OpenSpec skills"
 ```
 
-Only then does the drift check turn green. For several projects at once, use
+Only then does the drift check turn green. The explicit paths keep files from
+other tools out of the commit, such as the skills and `CLAUDE.md` guidance an
+[openrig](https://github.com/mvschwarz/openrig) team puts into the project.
+The quotes matter: git expands `openspec-*` itself and so also stages skills
+that the new version removed. In a project without `.opencode/`, leave that
+path out, otherwise git stops with "pathspec did not match". For several projects at once, use
 `scripts/bump-openspec.sh` in `ansible-terminal`.
 
 ## Your own skills in a project
@@ -117,3 +124,10 @@ Only then does the drift check turn green. For several projects at once, use
 In OpenCode the commands are `/opsx-propose`, `/opsx-apply` and
 `/opsx-archive`. The exact commands are in `.claude/commands/opsx/` and
 `.opencode/commands/` and depend on the pinned OpenSpec version.
+
+With an [openrig](https://github.com/mvschwarz/openrig) team, step 3 can go to
+the team instead:
+`rig send dev-build@starter 'Implement openspec/changes/<name> with /opsx:apply, then have dev-review check it.'`
+The team members are ordinary Claude Code sessions in the project and see the
+same `/opsx:` commands. Setup and rules: the "openrig" section in
+[ansible-terminal's docs/dev-tools.md](https://github.com/tycho991/ansible-terminal/blob/main/docs/dev-tools.md#openrig).

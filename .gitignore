@@ -1,2 +1,6 @@
 # Personal Claude Code approvals stay local and do not belong in the repo
 .claude/settings.local.json
+
+# openrig's per-project runtime files (context collector), see the
+# "openrig" section in ansible-terminal's docs/dev-tools.md
+.openrig/
